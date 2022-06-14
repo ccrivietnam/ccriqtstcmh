@@ -491,7 +491,7 @@ $(window).on('load', function() {
       labels.push(
         '<i style="background:' + color + '; opacity: '
         + tryPolygonSetting(p, '_colorOpacity', '0.7') + '"></i> ' +
-        from + ( (to && (isNum || hasColon) ) ? ' &ndash; ' + to : (isNum) ? '+' : ''));
+        from + ( (to && (isNum) ) ? ' &ndash; ' + to : (isNum) ? '+' : ''));
     }
 
     $('.polygons-legend' + p + ' .polygons-legend-scale').html(labels.join('<br>'));
