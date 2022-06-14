@@ -354,7 +354,7 @@ $(window).on('load', function() {
 
       // For each set of divisors, decide whether textual or numerical
       for (i = 0; i < divisors.length; i++) {
-        if (!isNaN(parseFloat(divisors[i][0].trim()))) {
+        if (!isNaN(parseFloat(divisors[i][0].trim())) && !divisors[i][0].trim().includes(":")) {
           isNumerical[i] = true;
           for (j = 0; j < divisors[i].length; j++) {
             divisors[i][j] = parseFloat(divisors[i][j].trim());
@@ -473,16 +473,25 @@ $(window).on('load', function() {
     for (var i = 0; i < allDivisors[p][z].length; i++) {
       var isNum = allIsNumerical[p][z];
       var from = allDivisors[p][z][i];
+      var orgFrom = from; // original value of from
       var to = allDivisors[p][z][i+1];
 
-      var color = getColor(from);
+      // Customized by RTA
+      var hasColon = false;
+      if (typeof from === "string" && from.includes(":")) {
+        hasColon = true;
+        from = from.split(":")[1].trim();
+        to = typeof to !== "undefined" ? to.split(":")[1].trim() : "";
+      }
+
+      var color = hasColon ? getColor(orgFrom) : getColor(from);
       from = from ? comma(from) : from;
       to = to ? comma(to) : to;
 
       labels.push(
         '<i style="background:' + color + '; opacity: '
         + tryPolygonSetting(p, '_colorOpacity', '0.7') + '"></i> ' +
-        from + ((to && isNum) ? '&ndash;' + to : (isNum) ? '+' : ''));
+        from + ( (to && (isNum || hasColon) ) ? ' &ndash; ' + to : (isNum) ? '+' : ''));
     }
 
     $('.polygons-legend' + p + ' .polygons-legend-scale').html(labels.join('<br>'));
