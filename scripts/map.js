@@ -535,6 +535,11 @@ $(window).on('load', function() {
     var col = allColors[polygon][layer];
     var div = allDivisors[polygon][layer];
 
+    // Custom typeof d to work with case3 (num:text)
+    if (typeof d === "string" && !d.includes(":")) {
+      d = parseFloat(d);
+    }
+
     var i;
 
     if (num) {
