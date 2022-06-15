@@ -62,5 +62,8 @@ var constants = {
   _displayHSTSLayer: 'HSTS Layer on/off',
   _HSTSGeoJsonURL: 'HSTS GeoJSON URL',
   _displayHSTSLabel: 'HSTS Label on/off',
-  _HSTSLayerColor: 'HSTS Layer color'
+  _HSTSLayerColor: 'HSTS Layer color',
+  _HSText: 'HS Text',
+  _TSText: 'TS Text',
+  _HSTSLabelZoomLevel: 'HSTS Label Zoom Level'
 };

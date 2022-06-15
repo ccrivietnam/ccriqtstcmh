@@ -913,6 +913,12 @@ $(window).on('load', function() {
         }
       }
     }
+
+    if (map.getZoom() <= trySetting('_HSTSLabelZoomLevel', 5)) {
+      $('.custom-popup .leaflet-popup-content').hide();
+    } else {
+      $('.custom-popup .leaflet-popup-content').show();
+    }
   }
 
   /**
@@ -979,7 +985,7 @@ $(window).on('load', function() {
             autoClose: false,
             className: "custom-popup"
           }).setLatLng([15.896712, 112.525060])
-            .setContent("Quần Đảo<br>Hoàng Sa")
+            .setContent(trySetting('_HSText', 'Quần Đảo<br>Hoàng Sa'))
             .openOn(map);
           
           L.popup({
@@ -987,7 +993,7 @@ $(window).on('load', function() {
               autoClose: false,
               className: "custom-popup"
           }).setLatLng([9.487044, 114.350166])
-            .setContent('Quần Đảo<br>Trường Sa')
+            .setContent(trySetting('_TSText', 'Quần Đảo<br>Trường Sa'))
             .openOn(map);
         }
       });
