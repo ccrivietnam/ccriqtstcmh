@@ -307,6 +307,7 @@ $(window).on('load', function() {
 
   function processAllPolygons() {
     var p = 0;  // polygon sheet
+    var baseTrees = [];
 
     while (p < polygonSettings.length && getPolygonSetting(p, '_polygonsGeojsonURL').trim()) {
       isNumerical = [];
@@ -375,6 +376,7 @@ $(window).on('load', function() {
       polygonsLegend.onAdd = function(map) {
         var content = '<h6 class="pointer">' + getPolygonSetting(p, '_polygonsLegendTitle') + '</h6>';
         content += '<form>';
+        let contentNonHeader = '<form>';
 
         for (i in polygonLayers) {
           var layer = polygonLayers[i][1]
@@ -385,9 +387,30 @@ $(window).on('load', function() {
 
           content += '<label><input type="radio" name="prop" value="' + p + ';' + i + '"> ';
           content += layer + '</label><br>';
+          contentNonHeader +=
+            '<label><input type="radio" name="prop" value="' +
+            p +
+            ";" +
+            i +
+            '"> ';
+          contentNonHeader += layer + "</label><br>";
         }
 
         content += '<label><input type="radio" name="prop" value="' + p + ';-1"> Off</label></form><div class="polygons-legend-scale">';
+        contentNonHeader +=
+          '<label><input type="radio" name="prop" value="' +
+          p +
+          ';-1"> Off</label></form><div class="polygons-legend-scale">';
+        
+        let baseTree = {
+          label: getPolygonSetting(p, "_polygonsLegendTitle"),
+          children: [
+            {
+              label: `<div class="ladder polygons-legend${p}">${contentNonHeader}</div>`,
+            },
+          ],
+        };
+        baseTrees.push(baseTree);
 
         var div = L.DomUtil.create('div', 'leaflet-control leaflet-control-custom leaflet-bar ladder polygons-legend' + p);
         div.innerHTML = content;
@@ -403,6 +426,9 @@ $(window).on('load', function() {
 
       p++;
     }
+    
+    // create base tree
+    L.control.layers.tree(baseTrees).addTo(map);
 
     // Generate polygon labels layers
     for (var i in allTextLabels) {
