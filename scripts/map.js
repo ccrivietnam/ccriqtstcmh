@@ -402,6 +402,7 @@ $(window).on('load', function() {
           p +
           ';-1"> Off</label></form><div class="polygons-legend-scale">';
         
+        // create base tree
         let baseTree = {
           label: getPolygonSetting(p, "_polygonsLegendTitle"),
           children: [
@@ -426,8 +427,7 @@ $(window).on('load', function() {
 
       p++;
     }
-    
-    // create base tree
+    // create control layer
     L.control.layers.tree(baseTrees).addTo(map);
 
     // Generate polygon labels layers
