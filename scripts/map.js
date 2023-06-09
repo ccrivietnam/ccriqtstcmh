@@ -376,7 +376,7 @@ $(window).on('load', function() {
        polygonsLegend.onAdd = function(map) {
         var content = '<h6 class="pointer">' + getPolygonSetting(p, '_polygonsLegendTitle') + '</h6>';
         content += '<form>';
-        let contentNonHeader = "<form>";
+        let contentNonHeaderCheckbox = "<form>";
         for (i in polygonLayers) {
           var layer = polygonLayers[i][1]
             ? polygonLayers[i][1].trim()
