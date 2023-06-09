@@ -376,7 +376,7 @@ $(window).on('load', function() {
       polygonsLegend.onAdd = function(map) {
         var content = '<h6 class="pointer">' + getPolygonSetting(p, '_polygonsLegendTitle') + '</h6>';
         content += '<form>';
-        let contentNonHeaderCheckbox = "<form>";
+        let contentNonHeaderCheckbox = '<form style="margin-left: 10px">';
         for (i in polygonLayers) {
           var layer = polygonLayers[i][1]
             ? polygonLayers[i][1].trim()
@@ -464,6 +464,27 @@ $(window).on('load', function() {
         return result;
       }
       const structureTrees = structureTree(arrGroupSplit);
+
+      // Sort layer tree have children move to above
+      const sortItems = (items) => {
+        items.sort((a, b) => {
+          if (a.children && !b.children) {
+            return -1; // Move items with children above
+          } else if (!a.children && b.children) {
+            return 1; // Move items without children below
+          } else {
+            return 0; // Preserve the original order
+          }
+        });
+
+        items.forEach((item) => {
+          if (item.children) {
+            sortItems(item.children); // Recursively sort children
+          }
+        });
+      };
+
+      sortItems(structureTrees);
 
       // Generate tree
       var ctl = L.control.layers.tree(null, null, {
