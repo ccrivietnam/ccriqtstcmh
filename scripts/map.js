@@ -378,9 +378,6 @@ $(window).on('load', function() {
         var content = '<h6 class="pointer">' + getPolygonSetting(p, '_polygonsLegendTitle') + '</h6>';
         content += '<form>';
         let contentNonHeader = "<form>";
-        
-        arrGroup.push(getPolygonSetting(p, "_polygonsGroup"));
-
         for (i in polygonLayers) {
           var layer = polygonLayers[i][1]
             ? polygonLayers[i][1].trim()
@@ -404,6 +401,12 @@ $(window).on('load', function() {
           '<label><input type="radio" name="prop" value="' +
           p +
           ';-1"> Off</label></form><div class="polygons-legend-scale">';
+        
+        arrGroup.push({
+          group: getPolygonSetting(p, "_polygonsGroup"),
+          sheets: `<div class="ladder polygons-legend${p}">${contentNonHeader}</div>`,
+          nameSheet: getPolygonSetting(p, "_polygonsLegendTitle"),
+        });
         
         // create base tree
         let baseTree = {
@@ -430,93 +433,50 @@ $(window).on('load', function() {
 
       p++;
     }
-    // create control layer
-    // L.control.layers.tree(baseTrees).addTo(map);
 
     let arrGroupClone = [];
     for (let i = 0; i < arrGroup.length; i++) {
-      const part = arrGroup[i].split("::");
-      arrGroupClone.push(part);
+      const part = arrGroup[i].group.split("::");
+      arrGroupClone.push({
+        group: part,
+        sheets: arrGroup[i].sheets,
+        nameSheet: arrGroup[i].nameSheet,
+      });
     }
 
-    // const arr = [
-    //   ["Chỉ số CCRI"],
-    //   ["Chỉ số CCRI", "Chỉ số P1"],
-    //   ["Chỉ số CCRI", "Bão"],
-    //   ["Chỉ số CCRI", "Chỉ số P2"],
-    //   ["Chỉ số CCRI", "Bão", "Tỷ lệ hộ nghèo", "Ô nhiễm không khí"],
-    //   ["Chỉ số CCRI", "Dân số"],
-    //   ["Chỉ số CCRI", "Bão", "Tỷ lệ hộ nghèo"],
-    // ];
-    // result = {
-    //   label: "Chỉ số CCRI",
-    //   children: [
-    //     { label: "Chỉ số P1" },
-    //     {
-    //       label: "Bão",
-    //       children: [
-    //         {
-    //           label: "Tỷ lệ hộ nghèo",
-    //           children: [
-    //             {
-    //               label: "Ô nhiễm không khí",
-    //             },
-    //           ],
-    //         },
-    //       ],
-    //     },
-    //     { label: "Chỉ số P2" },
-    //     { label: "Dân số" },
-    //   ],
-    // };
+  function structureTree(arr) {
+    const result = [];
 
-    function buildTreeStructure(arr, baseTrees) {
-      const result = {};
-      for (const item of arr) {
-        let currentLevel = result;
-        for (const label of item) {
-          let existingNode =
-            currentLevel.children &&
-            currentLevel.children.find((node) => node.label === label);
-          if (!existingNode) {
-            existingNode = { label: label, children: [] };
-            baseTrees.forEach((item) => {
-              if (existingNode.label == item.label) {
-                existingNode.children = item.children;
-              }
-            });
-            if (!currentLevel.children) {
-              currentLevel.children = [];
-            }
-            currentLevel.children.push(existingNode);
-          }
-          currentLevel = existingNode;
+    for (const item of arr) {
+      const { group, sheets, nameSheet } = item;
+      let currentLevel = result;
+
+      for (const label of group) {
+        let child = currentLevel.find((el) => el.label === label);
+        if (!child) {
+          child = { label, children: [] };
+          currentLevel.push(child);
         }
+        currentLevel = child.children;
       }
-      return result.children[0];
+
+      currentLevel.push({ label: nameSheet, children: [{ label: sheets }] });
     }
 
-    const result = buildTreeStructure(arrGroupClone, baseTrees);
-    console.log("🚀 ~ file: map.js:500 ~ processAllPolygons ~ result:", result)
+    return result;
+  }
+    const structureTree = structureTree(arrGroupClone);
 
     // create control layer
     if (getSetting("_mapLayerControl") !== "off") {
-      // L.control.layers
-      //   .tree(baseTrees, {}, { position: getSetting("_mapLayerControl") })
-      //   .addTo(map);
-
       var ctl = L.control.layers.tree(null, null, {
-        // namedToggle: true,
-        // collapsed: false,
         collapseAll: "Collapse all",
         expandAll: "Expand all",
         position: getSetting("_mapLayerControl"),
       });
 
       ctl.addTo(map).collapseTree().expandSelected();
-      ctl.setOverlayTree(result);
-      // .collapseTree(true)
-      // .expandSelected(true);
+      ctl.setOverlayTree(structureTree);
     }
 
     // Generate polygon labels layers
