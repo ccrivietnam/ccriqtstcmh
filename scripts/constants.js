@@ -29,6 +29,7 @@ var constants = {
 	_mapZoom: 'Zoom Controls',
 	_mapMyLocation: 'Show My Location',
 	_mapAttribution: 'Credits and Attribution',
+	_mapLayerControl: 'Layer Control',
 	// Point Map Display
 	_pointsLegendTitle: 'Point Legend Title',
 	_pointsLegendPos: 'Point Legend Position',
@@ -65,5 +66,7 @@ var constants = {
   _HSTSLayerColor: 'HSTS Layer color',
   _HSText: 'HS Text',
   _TSText: 'TS Text',
-  _HSTSLabelZoomLevel: 'HSTS Label Zoom Level'
+  _HSTSLabelZoomLevel: 'HSTS Label Zoom Level',
+  // Legend Settings
+  _polygonsGroup: 'Legend Group'
 };

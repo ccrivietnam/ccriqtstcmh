@@ -9,6 +9,7 @@ $(window).on('load', function() {
   var completePolygons = false;
   var completePolylines = false;
 
+  let arrGroup = []
   /**
    * Returns an Awesome marker with specified parameters
    */
@@ -376,7 +377,9 @@ $(window).on('load', function() {
       polygonsLegend.onAdd = function(map) {
         var content = '<h6 class="pointer">' + getPolygonSetting(p, '_polygonsLegendTitle') + '</h6>';
         content += '<form>';
-        let contentNonHeader = '<form>';
+        let contentNonHeader = "<form>";
+        
+        arrGroup.push(getPolygonSetting(p, "_polygonsGroup"));
 
         for (i in polygonLayers) {
           var layer = polygonLayers[i][1]
@@ -428,7 +431,93 @@ $(window).on('load', function() {
       p++;
     }
     // create control layer
-    L.control.layers.tree(baseTrees).addTo(map);
+    // L.control.layers.tree(baseTrees).addTo(map);
+
+    let arrGroupClone = [];
+    for (let i = 0; i < arrGroup.length; i++) {
+      const part = arrGroup[i].split("::");
+      arrGroupClone.push(part);
+    }
+
+    // const arr = [
+    //   ["Chỉ số CCRI"],
+    //   ["Chỉ số CCRI", "Chỉ số P1"],
+    //   ["Chỉ số CCRI", "Bão"],
+    //   ["Chỉ số CCRI", "Chỉ số P2"],
+    //   ["Chỉ số CCRI", "Bão", "Tỷ lệ hộ nghèo", "Ô nhiễm không khí"],
+    //   ["Chỉ số CCRI", "Dân số"],
+    //   ["Chỉ số CCRI", "Bão", "Tỷ lệ hộ nghèo"],
+    // ];
+    // result = {
+    //   label: "Chỉ số CCRI",
+    //   children: [
+    //     { label: "Chỉ số P1" },
+    //     {
+    //       label: "Bão",
+    //       children: [
+    //         {
+    //           label: "Tỷ lệ hộ nghèo",
+    //           children: [
+    //             {
+    //               label: "Ô nhiễm không khí",
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     },
+    //     { label: "Chỉ số P2" },
+    //     { label: "Dân số" },
+    //   ],
+    // };
+
+    function buildTreeStructure(arr, baseTrees) {
+      const result = {};
+      for (const item of arr) {
+        let currentLevel = result;
+        for (const label of item) {
+          let existingNode =
+            currentLevel.children &&
+            currentLevel.children.find((node) => node.label === label);
+          if (!existingNode) {
+            existingNode = { label: label, children: [] };
+            baseTrees.forEach((item) => {
+              if (existingNode.label == item.label) {
+                existingNode.children = item.children;
+              }
+            });
+            if (!currentLevel.children) {
+              currentLevel.children = [];
+            }
+            currentLevel.children.push(existingNode);
+          }
+          currentLevel = existingNode;
+        }
+      }
+      return result.children[0];
+    }
+
+    const result = buildTreeStructure(arrGroupClone, baseTrees);
+    console.log("🚀 ~ file: map.js:500 ~ processAllPolygons ~ result:", result)
+
+    // create control layer
+    if (getSetting("_mapLayerControl") !== "off") {
+      // L.control.layers
+      //   .tree(baseTrees, {}, { position: getSetting("_mapLayerControl") })
+      //   .addTo(map);
+
+      var ctl = L.control.layers.tree(null, null, {
+        // namedToggle: true,
+        // collapsed: false,
+        collapseAll: "Collapse all",
+        expandAll: "Expand all",
+        position: getSetting("_mapLayerControl"),
+      });
+
+      ctl.addTo(map).collapseTree().expandSelected();
+      ctl.setOverlayTree(result);
+      // .collapseTree(true)
+      // .expandSelected(true);
+    }
 
     // Generate polygon labels layers
     for (var i in allTextLabels) {
@@ -788,7 +877,6 @@ $(window).on('load', function() {
 
     // Add Google Analytics if the ID exists
     var ga = getSetting('_googleAnalytics');
-    console.log(ga)
     if ( ga && ga.length >= 10 ) {
       var gaScript = document.createElement('script');
       gaScript.setAttribute('src','https://www.googletagmanager.com/gtag/js?id=' + ga);
