@@ -309,7 +309,7 @@ $(window).on('load', function() {
   function processAllPolygons() {
     var p = 0; // polygon sheet
 
-   while (p < polygonSettings.length && getPolygonSetting(p, '_polygonsGeojsonURL').trim()) {
+    while (p < polygonSettings.length && getPolygonSetting(p, '_polygonsGeojsonURL').trim()) {
       isNumerical = [];
       divisors = [];
       colors = [];
@@ -355,7 +355,7 @@ $(window).on('load', function() {
 
       // For each set of divisors, decide whether textual or numerical
       for (i = 0; i < divisors.length; i++) {
-         if (!isNaN(parseFloat(divisors[i][0].trim())) && !divisors[i][0].trim().includes(":")) {
+        if (!isNaN(parseFloat(divisors[i][0].trim())) && !divisors[i][0].trim().includes(":")) {
           isNumerical[i] = true;
           for (j = 0; j < divisors[i].length; j++) {
             divisors[i][j] = parseFloat(divisors[i][j].trim());
@@ -373,7 +373,7 @@ $(window).on('load', function() {
       var legendPos = tryPolygonSetting(p, '_polygonsLegendPosition', 'off');
       polygonsLegend = L.control({position: (legendPos == 'off') ? 'topleft' : legendPos});
 
-       polygonsLegend.onAdd = function(map) {
+      polygonsLegend.onAdd = function(map) {
         var content = '<h6 class="pointer">' + getPolygonSetting(p, '_polygonsLegendTitle') + '</h6>';
         content += '<form>';
         let contentNonHeaderCheckbox = "<form>";
@@ -430,41 +430,42 @@ $(window).on('load', function() {
       p++;
     }
 
-    let arrGroupClone = [];
-    for (let i = 0; i < arrGroup.length; i++) {
-      const part = arrGroup[i].group.split("::");
-      arrGroupClone.push({
-        group: part,
-        sheets: arrGroup[i].sheets,
-        nameSheet: arrGroup[i].nameSheet,
-      });
-    }
-
-    function structureTree(arr) {
-      const result = [];
-
-      for (const item of arr) {
-        const { group, sheets } = item;
-        let currentLevel = result;
-
-        for (const label of group) {
-          let child = currentLevel.find((el) => el.label === label);
-          if (!child) {
-            child = { label, children: [], selectAllCheckbox: true };
-            currentLevel.push(child);
-          }
-          currentLevel = child.children;
-        }
-
-        currentLevel.push({label: sheets});
-      }
-
-      return result;
-    }
-    const structureTrees = structureTree(arrGroupClone);
-
     // create control layer
     if (getSetting("_mapTreeControl") !== "off") {
+      let arrGroupSplit = [];
+      for (let i = 0; i < arrGroup.length; i++) {
+        const part = arrGroup[i].group.split("::");
+        arrGroupSplit.push({
+          group: part,
+          sheets: arrGroup[i].sheets,
+          nameSheet: arrGroup[i].nameSheet,
+        });
+      }
+
+      function structureTree(arr) {
+        const result = [];
+
+        for (const item of arr) {
+          const { group, sheets } = item;
+          let currentLevel = result;
+
+          for (const label of group) {
+            let child = currentLevel.find((el) => el.label === label);
+            if (!child) {
+              child = { label, children: [], selectAllCheckbox: true };
+              currentLevel.push(child);
+            }
+            currentLevel = child.children;
+          }
+
+          currentLevel.push({ label: sheets });
+        }
+
+        return result;
+      }
+      const structureTrees = structureTree(arrGroupSplit);
+
+      // Generate tree
       var ctl = L.control.layers.tree(null, null, {
         collapseAll: "Collapse all",
         expandAll: "Expand all",
@@ -481,12 +482,14 @@ $(window).on('load', function() {
     }
 
     // This is triggered when user changes the radio button
-    $('.ladder input:radio[name="prop"]').change(function() {
-      polygon = parseInt($(this).val().split(';')[0]);
-      layer = parseInt($(this).val().split(';')[1]);
+    $('.ladder input:radio[name="prop"]').change(function () {
+      polygon = parseInt($(this).val().split(";")[0]);
+      layer = parseInt($(this).val().split(";")[1]);
 
       if (layer == -1) {
-        $('.polygons-legend' + polygon).find('.polygons-legend-scale').hide();
+        $(".polygons-legend" + polygon)
+          .find(".polygons-legend-scale")
+          .hide();
         if (map.hasLayer(allGeojsons[polygon])) {
           map.removeLayer(allGeojsons[polygon]);
           if (map.hasLayer(allTextLabelsLayers[polygon])) {
@@ -498,6 +501,7 @@ $(window).on('load', function() {
       }
     });
 
+    // This is triggered when user changes the checkbox button in tree layer control
     $('.ladder input:checkbox[name="prop"]').change(function () {
       polygon = parseInt($(this).val().split(";")[0]);
       layer = parseInt($(this).val().split(";")[1]);
@@ -541,7 +545,7 @@ $(window).on('load', function() {
       }
     }
 
-    $('.polygons-legend-merged h6').eq(0).click().click();
+      $('.polygons-legend-merged h6').eq(0).click().click();
 
     completePolygons = true;
   }
