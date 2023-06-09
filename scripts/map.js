@@ -458,6 +458,7 @@ $(window).on('load', function() {
           currentLevel.push(child);
         }
         currentLevel = child.children;
+        console.log("🚀 ~ file: map.js:461 ~ structureTree ~ currentLevel:", currentLevel)
       }
 
       currentLevel.push({ label: nameSheet, children: [{ label: sheets }] });
@@ -465,7 +466,7 @@ $(window).on('load', function() {
 
     return result;
   }
-    const structureTree = structureTree(arrGroupClone);
+    const structureTrees = structureTree(arrGroupClone);
 
     // create control layer
     if (getSetting("_mapLayerControl") !== "off") {
@@ -476,7 +477,7 @@ $(window).on('load', function() {
       });
 
       ctl.addTo(map).collapseTree().expandSelected();
-      ctl.setOverlayTree(structureTree);
+      ctl.setOverlayTree(structureTrees);
     }
 
     // Generate polygon labels layers
