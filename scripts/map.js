@@ -458,7 +458,6 @@ $(window).on('load', function() {
           currentLevel.push(child);
         }
         currentLevel = child.children;
-        console.log("🚀 ~ file: map.js:461 ~ structureTree ~ currentLevel:", currentLevel)
       }
 
       currentLevel.push({ label: nameSheet, children: [{ label: sheets }] });
