@@ -547,7 +547,7 @@ $(window).on('load', function() {
       }
     }
 
-      $('.polygons-legend-merged h6').eq(0).click().click();
+    $('.polygons-legend-merged h6').eq(0).click().click();
 
     completePolygons = true;
   }
