@@ -384,47 +384,30 @@ $(window).on('load', function() {
 
           layer = (layer == '') ? 'On' : layer;
 
-          content +=
-            '<label><input type="radio" name="prop" value="' +
-            p +
-            ";" +
-            i +
-            '"> ';
-          content += layer + "</label><br>";
-          contentNonHeaderCheckbox +=
-            '<label><input type="checkbox" name="prop" value="' +
-            p +
-            ";" +
-            i +
-            '"> ';
+          content += '<label><input type="radio" name="prop" value="' + p + ';' + i + '"> ';
+          content += layer + '</label><br>';
+
+          contentNonHeaderCheckbox += '<label><input type="checkbox" name="prop" value="' + p + ';' + i + '"> ';
           contentNonHeaderCheckbox += layer + "</label><br>";
         }
 
-        content +=
-          '<label><input type="radio" name="prop" value="' +
-          p +
-          ';-1"> Off</label></form><div class="polygons-legend-scale">';
-        contentNonHeaderCheckbox +=
-          '</form><div class="polygons-legend-scale">';
+        content += '<label><input type="radio" name="prop" value="' + p + ';-1"> Off</label></form><div class="polygons-legend-scale">';
+        contentNonHeaderCheckbox += '</form><div class="polygons-legend-scale">';
 
         arrGroup.push({
           group: getPolygonSetting(p, "_polygonsGroup"),
           sheets: `<div class="ladder polygons-legend${p}">${contentNonHeaderCheckbox}</div>`,
         });
 
-        var div = L.DomUtil.create(
-          "div",
-          "leaflet-control leaflet-control-custom leaflet-bar ladder polygons-legend" +
-            p
-        );
+        var div = L.DomUtil.create('div', 'leaflet-control leaflet-control-custom leaflet-bar ladder polygons-legend' + p);
         div.innerHTML = content;
-        div.innerHTML += "</div>";
+        div.innerHTML += '</div>';
         return div;
       };
 
       polygonsLegend.addTo(map);
-      if (getPolygonSetting(p, "_polygonsLegendPosition") == "off") {
-        $(".polygons-legend" + p).css("display", "none");
+      if (getPolygonSetting(p, '_polygonsLegendPosition') == 'off') {
+        $('.polygons-legend' + p).css('display', 'none');
       }
       allPolygonLegends.push(polygonsLegend);
       p++;
@@ -503,14 +486,12 @@ $(window).on('load', function() {
     }
 
     // This is triggered when user changes the radio button
-    $('.ladder input:radio[name="prop"]').change(function () {
-      polygon = parseInt($(this).val().split(";")[0]);
-      layer = parseInt($(this).val().split(";")[1]);
+    $('.ladder input:radio[name="prop"]').change(function() {
+      polygon = parseInt($(this).val().split(';')[0]);
+      layer = parseInt($(this).val().split(';')[1]);
 
       if (layer == -1) {
-        $(".polygons-legend" + polygon)
-          .find(".polygons-legend-scale")
-          .hide();
+        $('.polygons-legend' + polygon).find('.polygons-legend-scale').hide();
         if (map.hasLayer(allGeojsons[polygon])) {
           map.removeLayer(allGeojsons[polygon]);
           if (map.hasLayer(allTextLabelsLayers[polygon])) {
@@ -556,7 +537,7 @@ $(window).on('load', function() {
     });
 
     for (t = 0; t < p; t++) {
-      if (getPolygonSetting(t, "_polygonShowOnStart") == "on") {
+      if (getPolygonSetting(t, '_polygonShowOnStart') == 'on') {
         if (getSetting("_mapTreeControl") !== "off") {
           $('.ladder input:checkbox[name="prop"][value="' + t + ';0"]').click();
         }
@@ -892,6 +873,7 @@ $(window).on('load', function() {
 
     // Add Google Analytics if the ID exists
     var ga = getSetting('_googleAnalytics');
+    console.log(ga)
     if ( ga && ga.length >= 10 ) {
       var gaScript = document.createElement('script');
       gaScript.setAttribute('src','https://www.googletagmanager.com/gtag/js?id=' + ga);
