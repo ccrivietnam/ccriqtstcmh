@@ -417,7 +417,7 @@ $(window).on('load', function() {
     if (isTreeOn) {
       let arrGroupSplit = [];
       for (let i = 0; i < arrGroup.length; i++) {
-        if (arrGroup[i].group !== undefined) {
+        if (arrGroup[i].group !== undefined && arrGroup[i].group?.trim().length !== 0) {
           const part = arrGroup[i].group.split("::");
           arrGroupSplit.push({
             group: part,
