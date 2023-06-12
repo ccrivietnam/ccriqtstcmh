@@ -308,7 +308,7 @@ $(window).on('load', function() {
 
   function processAllPolygons() {
     var p = 0; // polygon sheet
-
+    const isTreeOn = getSetting("_mapTreeControl") !== "off"
     while (p < polygonSettings.length && getPolygonSetting(p, '_polygonsGeojsonURL').trim()) {
       isNumerical = [];
       divisors = [];
@@ -406,7 +406,7 @@ $(window).on('load', function() {
       };
 
       polygonsLegend.addTo(map);
-      if (getPolygonSetting(p, '_polygonsLegendPosition') == 'off') {
+      if (getPolygonSetting(p, '_polygonsLegendPosition') == 'off' || isTreeOn) {
         $('.polygons-legend' + p).css('display', 'none');
       }
       allPolygonLegends.push(polygonsLegend);
@@ -414,15 +414,21 @@ $(window).on('load', function() {
     }
 
     // create control layer
-    if (getSetting("_mapTreeControl") !== "off") {
+    if (isTreeOn) {
       let arrGroupSplit = [];
       for (let i = 0; i < arrGroup.length; i++) {
-        const part = arrGroup[i].group.split("::");
-        arrGroupSplit.push({
-          group: part,
-          sheets: arrGroup[i].sheets,
-          nameSheet: arrGroup[i].nameSheet,
-        });
+        if (arrGroup[i].group !== undefined) {
+          const part = arrGroup[i].group.split("::");
+          arrGroupSplit.push({
+            group: part,
+            sheets: arrGroup[i].sheets,
+          });
+        } else {
+          arrGroupSplit.push({
+            group: "",
+            sheets: arrGroup[i].sheets,
+          });
+        }
       }
 
       function structureTree(arr) {
@@ -538,7 +544,7 @@ $(window).on('load', function() {
 
     for (t = 0; t < p; t++) {
       if (getPolygonSetting(t, '_polygonShowOnStart') == 'on') {
-        if (getSetting("_mapTreeControl") !== "off") {
+        if (isTreeOn) {
           $('.ladder input:checkbox[name="prop"][value="' + t + ';0"]').click();
         }
         $('.ladder input:radio[name="prop"][value="' + t + ';0"]').click();
@@ -873,7 +879,6 @@ $(window).on('load', function() {
 
     // Add Google Analytics if the ID exists
     var ga = getSetting('_googleAnalytics');
-    console.log(ga)
     if ( ga && ga.length >= 10 ) {
       var gaScript = document.createElement('script');
       gaScript.setAttribute('src','https://www.googletagmanager.com/gtag/js?id=' + ga);
