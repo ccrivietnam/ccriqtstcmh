@@ -9,6 +9,7 @@ $(window).on('load', function() {
   var completePolygons = false;
   var completePolylines = false;
 
+  let arrGroup = []
   /**
    * Returns an Awesome marker with specified parameters
    */
@@ -306,8 +307,8 @@ $(window).on('load', function() {
   }
 
   function processAllPolygons() {
-    var p = 0;  // polygon sheet
-
+    var p = 0; // polygon sheet
+    const isTreeOn = getSetting("_mapTreeControl") !== "off"
     while (p < polygonSettings.length && getPolygonSetting(p, '_polygonsGeojsonURL').trim()) {
       isNumerical = [];
       divisors = [];
@@ -375,19 +376,28 @@ $(window).on('load', function() {
       polygonsLegend.onAdd = function(map) {
         var content = '<h6 class="pointer">' + getPolygonSetting(p, '_polygonsLegendTitle') + '</h6>';
         content += '<form>';
-
+        let contentNonHeaderCheckbox = '<form style="margin-left: 10px">';
         for (i in polygonLayers) {
           var layer = polygonLayers[i][1]
             ? polygonLayers[i][1].trim()
             : polygonLayers[i][0].trim();
 
-            layer = (layer == '') ? 'On' : layer;
+          layer = (layer == '') ? 'On' : layer;
 
           content += '<label><input type="radio" name="prop" value="' + p + ';' + i + '"> ';
           content += layer + '</label><br>';
+
+          contentNonHeaderCheckbox += '<label><input type="checkbox" name="prop" value="' + p + ';' + i + '"> ';
+          contentNonHeaderCheckbox += layer + "</label><br>";
         }
 
         content += '<label><input type="radio" name="prop" value="' + p + ';-1"> Off</label></form><div class="polygons-legend-scale">';
+        contentNonHeaderCheckbox += '</form><div class="polygons-legend-scale">';
+
+        arrGroup.push({
+          group: getPolygonSetting(p, "_polygonsGroup"),
+          sheets: `<div class="ladder polygons-legend${p}">${contentNonHeaderCheckbox}</div>`,
+        });
 
         var div = L.DomUtil.create('div', 'leaflet-control leaflet-control-custom leaflet-bar ladder polygons-legend' + p);
         div.innerHTML = content;
@@ -396,12 +406,83 @@ $(window).on('load', function() {
       };
 
       polygonsLegend.addTo(map);
-      if (getPolygonSetting(p, '_polygonsLegendPosition') == 'off') {
+      if (getPolygonSetting(p, '_polygonsLegendPosition') == 'off' || isTreeOn) {
         $('.polygons-legend' + p).css('display', 'none');
       }
       allPolygonLegends.push(polygonsLegend);
-
       p++;
+    }
+
+    // create control layer
+    if (isTreeOn) {
+      let arrGroupSplit = [];
+      for (let i = 0; i < arrGroup.length; i++) {
+        if (arrGroup[i].group !== undefined) {
+          const part = arrGroup[i].group.split("::");
+          arrGroupSplit.push({
+            group: part,
+            sheets: arrGroup[i].sheets,
+          });
+        } else {
+          arrGroupSplit.push({
+            group: "",
+            sheets: arrGroup[i].sheets,
+          });
+        }
+      }
+
+      function structureTree(arr) {
+        const result = [];
+
+        for (const item of arr) {
+          const { group, sheets } = item;
+          let currentLevel = result;
+
+          for (const label of group) {
+            let child = currentLevel.find((el) => el.label === label);
+            if (!child) {
+              child = { label, children: [], selectAllCheckbox: true };
+              currentLevel.push(child);
+            }
+            currentLevel = child.children;
+          }
+
+          currentLevel.push({ label: sheets });
+        }
+
+        return result;
+      }
+      const structureTrees = structureTree(arrGroupSplit);
+
+      // Sort layer tree have children move to above
+      const sortItems = (items) => {
+        items.sort((a, b) => {
+          if (a.children && !b.children) {
+            return -1; // Move items with children above
+          } else if (!a.children && b.children) {
+            return 1; // Move items without children below
+          } else {
+            return 0; // Preserve the original order
+          }
+        });
+
+        items.forEach((item) => {
+          if (item.children) {
+            sortItems(item.children); // Recursively sort children
+          }
+        });
+      };
+
+      sortItems(structureTrees);
+
+      // Generate tree
+      var ctl = L.control.layers.tree(null, null, {
+        collapseAll: "Collapse all",
+        expandAll: "Expand all",
+        position: getSetting("_mapTreeControl"),
+      });
+      ctl.addTo(map).collapseTree().expandSelected();
+      ctl.setOverlayTree(structureTrees).collapseTree().expandSelected();
     }
 
     // Generate polygon labels layers
@@ -428,8 +509,44 @@ $(window).on('load', function() {
       }
     });
 
+    // This is triggered when user changes the checkbox button in tree layer control
+    $('.ladder input:checkbox[name="prop"]').change(function () {
+      polygon = parseInt($(this).val().split(";")[0]);
+      layer = parseInt($(this).val().split(";")[1]);
+      if ($(this).is(":checked")) {
+        updatePolygons();
+      } else {
+        $(".polygons-legend" + polygon)
+          .find(".polygons-legend-scale")
+          .hide();
+        if (map.hasLayer(allGeojsons[polygon])) {
+          map.removeLayer(allGeojsons[polygon]);
+          if (map.hasLayer(allTextLabelsLayers[polygon])) {
+            map.removeLayer(allTextLabelsLayers[polygon]);
+          }
+        }
+      }
+    });
+
+    // This is triggered when user click select all
+    $(
+      ".leaflet-control-layers-selector.leaflet-layerstree-sel-all-checkbox"
+    ).change(function () {
+      var parentCheckbox = $(this);
+      var childrenCheckboxes = parentCheckbox
+        .closest(".leaflet-layerstree-header")
+        .next(".leaflet-layerstree-children")
+        .find('.ladder input:checkbox[name="prop"]');
+
+      childrenCheckboxes.prop("checked", parentCheckbox.is(":checked"));
+      childrenCheckboxes.trigger("change");
+    });
+
     for (t = 0; t < p; t++) {
       if (getPolygonSetting(t, '_polygonShowOnStart') == 'on') {
+        if (isTreeOn) {
+          $('.ladder input:checkbox[name="prop"][value="' + t + ';0"]').click();
+        }
         $('.ladder input:radio[name="prop"][value="' + t + ';0"]').click();
       } else {
         $('.ladder input:radio[name="prop"][value="' + t + ';-1"]').click();
@@ -762,7 +879,6 @@ $(window).on('load', function() {
 
     // Add Google Analytics if the ID exists
     var ga = getSetting('_googleAnalytics');
-    console.log(ga)
     if ( ga && ga.length >= 10 ) {
       var gaScript = document.createElement('script');
       gaScript.setAttribute('src','https://www.googletagmanager.com/gtag/js?id=' + ga);
