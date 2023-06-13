@@ -499,7 +499,10 @@ $(window).on('load', function() {
             item.classList.remove('leaflet-control-layers-expanded')
           }
           item.addEventListener(('click'), (e) => {
-            item.classList.remove('leaflet-control-layers-expanded')
+            if (e.target === item) {
+              e.stopPropagation();
+              item.classList.remove('leaflet-control-layers-expanded');
+            }
           })
         }
       })
