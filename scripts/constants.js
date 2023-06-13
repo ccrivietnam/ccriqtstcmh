@@ -69,4 +69,5 @@ var constants = {
   _HSTSLabelZoomLevel: "HSTS Label Zoom Level",
   // Tree Settings
   _polygonsGroup: "Legend Group",
+  _defaultDisplayTree: "Default Open Tree on/off",
 };

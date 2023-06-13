@@ -480,9 +480,29 @@ $(window).on('load', function() {
         collapseAll: "Collapse all",
         expandAll: "Expand all",
         position: getSetting("_mapTreeControl"),
+        collapsed: false,
       });
       ctl.addTo(map).collapseTree().expandSelected();
       ctl.setOverlayTree(structureTrees).collapseTree().expandSelected();
+      
+      const treeParentElements = document.querySelectorAll('.leaflet-control-layers.leaflet-control.leaflet-control-layers-expanded')
+      const newElement = $('<i>', {
+        class: 'leaflet-layerstree-header-close fas fa-chevron-up',
+        tabindex: '0',
+      });
+
+      $('.leaflet-layerstree-expand-collapse:first').before(newElement);
+
+      treeParentElements.forEach((item) => {
+        if (!item.classList.contains('ladder')) {
+          if (getSetting("_defaultDisplayTree") === "off") {
+            item.classList.remove('leaflet-control-layers-expanded')
+          }
+          item.addEventListener(('click'), (e) => {
+            item.classList.remove('leaflet-control-layers-expanded')
+          })
+        }
+      })
     }
 
     // Generate polygon labels layers
@@ -684,7 +704,7 @@ $(window).on('load', function() {
     // Do not bind popups if 1. no popup properties specified and 2. display
     // images is turned off.
     if (getPolygonSetting(polygon, '_popupProp') == ''
-     && getPolygonSetting(polygon, '_polygonDisplayImages') == 'off') return;
+      && getPolygonSetting(polygon, '_polygonDisplayImages') == 'off') return;
 
     var info = '';
     props = allPopupProperties[polygon];

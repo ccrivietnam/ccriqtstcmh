@@ -58,3 +58,12 @@
 .leaflet-layerstree-expand-collapse {
   cursor: pointer;
 }
+.leaflet-layerstree-header-close{
+  position: absolute;
+  right: 5px;
+  padding: 5px;
+  cursor: pointer;
+}
+.leaflet-control-layers-overlays{
+  position: relative;
+}
