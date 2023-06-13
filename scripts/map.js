@@ -499,8 +499,6 @@ $(window).on('load', function() {
             item.classList.remove('leaflet-control-layers-expanded')
           }
           item.addEventListener(('click'), (e) => {
-            console.log("🚀 ~ file: map.js:507 ~ item.addEventListener ~ e:", e.target)
-            console.log("🚀 ~ file: map.js:504 ~ item.addEventListener ~ newElement:", newElement)
             if ($(e.target).is(newElement)) {
               e.stopPropagation();
               item.classList.remove('leaflet-control-layers-expanded');
