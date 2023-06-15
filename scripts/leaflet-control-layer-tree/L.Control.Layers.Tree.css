@@ -63,6 +63,8 @@
   right: 5px;
   padding: 5px;
   cursor: pointer;
+  color: rgb(185 184 184);
+  font-size: 15px;
 }
 .leaflet-control-layers-overlays{
   position: relative;
